@@ -41,7 +41,7 @@ int main(int argc, char *argv [])
 	// 3. 在我们将PCM数据写入声卡之前，我们必须指定访问类型，样本格式，采样率，通道数，周期数和周期大小。
 	// 首先，我们使用声卡的完整配置空间初始化hwparams结构
 	is_set(snd_pcm_hw_params_any(pcm_handle, hw_params), "配置空间初始化");
-  
+ 
 	// 3.1设置交错模式（访问模式）
 	// 常用的有 SND_PCM_ACCESS_RW_INTERLEAVED（交错模式） 和 SND_PCM_ACCESS_RW_NONINTERLEAVED （非交错模式） 参考：https://blog.51cto.com/yiluohuanghun/868048
 	is_set(snd_pcm_hw_params_set_access(pcm_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED), "设置交错模式（访问模式）");
@@ -67,7 +67,7 @@ int main(int argc, char *argv [])
 	// 释放之前配置的参数
 	snd_pcm_hw_params_free(hw_params);
 
-
+	
 	// feof函数检测文件结束符，结束：非0, 没结束：0
 	int ret = fread(buf, 1, BUF_LEN, fp);
 	printf("value is : %d \n", ret);
@@ -85,7 +85,7 @@ int main(int argc, char *argv [])
 			is_set(-1, "write to audio interface failed");
 		}
 	}
-	
+
 	fprintf(stderr, "end of music file input\n");
 	
 	// 关闭文件
@@ -135,29 +135,4 @@ bool is_set(int result, const char *str)
 	}
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
