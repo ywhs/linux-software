@@ -51,7 +51,7 @@ FILE *fp;
 
 
 // 函数声明
-bool is_set(int result, const char *str);
+bool debug_msg(int result, const char *str);
 void open_music_file(const char *path_name);
 
 

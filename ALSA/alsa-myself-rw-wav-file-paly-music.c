@@ -30,21 +30,21 @@ int main(int argc, char *argv [])
 	open_music_file(argv[1]);
 
 	// 1. 在堆栈上分配snd_pcm_hw_params_t结构体的空间，参数是配置pcm硬件的指针,返回0成功
-	is_set(snd_pcm_hw_params_malloc(&hw_params), "分配snd_pcm_hw_params_t结构体");
+	debug_msg(snd_pcm_hw_params_malloc(&hw_params), "分配snd_pcm_hw_params_t结构体");
 
 	// 2. 打开PCM设备 返回0 则成功，其他失败
 	// 函数的最后一个参数是配置模式，如果设置为0,则使用标准模式
 	// 其他值位SND_PCM_NONBLOCL和SND_PCM_ASYNC 如果使用NONBLOCL 则读/写访问, 如果是后一个就会发出SIGIO（没太懂什么意思）
 	pcm_name = strdup("hw:0,0");
-	is_set(snd_pcm_open(&pcm_handle, "default", stream, 0), "打开PCM设备");
+	debug_msg(snd_pcm_open(&pcm_handle, "default", stream, 0), "打开PCM设备");
 
 	// 3. 在我们将PCM数据写入声卡之前，我们必须指定访问类型，样本格式，采样率，通道数，周期数和周期大小。
 	// 首先，我们使用声卡的完整配置空间初始化hwparams结构
-	is_set(snd_pcm_hw_params_any(pcm_handle, hw_params), "配置空间初始化");
+	debug_msg(snd_pcm_hw_params_any(pcm_handle, hw_params), "配置空间初始化");
  
 	// 3.1设置交错模式（访问模式）
 	// 常用的有 SND_PCM_ACCESS_RW_INTERLEAVED（交错模式） 和 SND_PCM_ACCESS_RW_NONINTERLEAVED （非交错模式） 参考：https://blog.51cto.com/yiluohuanghun/868048
-	is_set(snd_pcm_hw_params_set_access(pcm_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED), "设置交错模式（访问模式）");
+	debug_msg(snd_pcm_hw_params_set_access(pcm_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED), "设置交错模式（访问模式）");
 
 	// 3.2 设置采样位数 根据音乐文件返回的采样位数设置
 	if(wav_header.bits_per_sample == 8){
@@ -52,18 +52,18 @@ int main(int argc, char *argv [])
 	}else if(wav_header.bits_per_sample == 16){
 		pcm_format = SND_PCM_FORMAT_S16_LE;
 	}
-	is_set(snd_pcm_hw_params_set_format(pcm_handle, hw_params, pcm_format), "设置采样位数");
+	debug_msg(snd_pcm_hw_params_set_format(pcm_handle, hw_params, pcm_format), "设置采样位数");
 
 	// 3.3 设置采样率为44.1KHz dir的范围(-1,0,1)
 	// rate = wav_header.sample_rate;
 	int dir = 0;
-	is_set(snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &wav_header.sample_rate, &dir), "设置采样率");
+	debug_msg(snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &wav_header.sample_rate, &dir), "设置采样率");
 
 	// 3.4 设置通道数
-	is_set(snd_pcm_hw_params_set_channels(pcm_handle, hw_params, wav_header.num_channels), "设置通道数");
+	debug_msg(snd_pcm_hw_params_set_channels(pcm_handle, hw_params, wav_header.num_channels), "设置通道数");
 
 	// 4. 设置的硬件配置参数，加载，并且会自动调用snd_pcm_prepare()将stream状态置为SND_PCM_STATE_PREPARED
-	is_set(snd_pcm_hw_params(pcm_handle, hw_params), "设置的硬件配置参数");
+	debug_msg(snd_pcm_hw_params(pcm_handle, hw_params), "设置的硬件配置参数");
 	// 释放之前配置的参数
 	snd_pcm_hw_params_free(hw_params);
 
@@ -74,15 +74,15 @@ int main(int argc, char *argv [])
 	while(!feof(fp)){
 		int ret = fread(buf, 1, BUF_LEN, fp);
 		if(ret == 0){
-			is_set(-1, "end of music file input! \n");
+			debug_msg(-1, "end of music file input! \n");
 		}
 		if(ret < 0){
-			is_set(-1, "read pcm from file");
+			debug_msg(-1, "read pcm from file");
 		}
 		// 向PCM设备写入数据
 		ret = snd_pcm_writei(pcm_handle, buf, BUF_LEN/4);
 		if(ret < 0){
-			is_set(-1, "write to audio interface failed");
+			debug_msg(-1, "write to audio interface failed");
 		}
 	}
 
@@ -127,7 +127,7 @@ void open_music_file(const char *path_name){
 }
 
 
-bool is_set(int result, const char *str)
+bool debug_msg(int result, const char *str)
 {
 	if(result < 0){
 		printf("err: %s 失败! \n", str);
