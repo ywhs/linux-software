@@ -217,7 +217,11 @@ ioctl(fd,SPI_IOC_WR_MAX_SPEED_HZ, &speed);
 
 可以先进行写操作在进行读操作，看一下读出来的数据是不是写进去的数据即可，还可以具体阅读myself-spi.c文件
 
+# 参考
 
+- [spi-dev-rw](https://emcraft.com/stm32f429discovery/accessing-spi-devices-in-linux)
+
+- [用户空间的spi驱动](https://blog.csdn.net/yuanlulu/article/details/6320740)
 
 
 
