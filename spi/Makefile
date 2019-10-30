@@ -7,15 +7,17 @@ main: clean spi
 # 相当于伪指令，但也有可能理解错了
 .PHONY: clean spi
 
-spi: spi.o
+# $@ 符号是Makefile中内置变量，代表目标文件
+# $^ 符号是Makefile中内置变量，代表依赖文件，即源文件
+spi: myself-spi.o
 	@echo "================ compile start ================"
 	$(GCC) $^ -o $@
-	@rm -rf spi.o
+	@rm -rf myself-spi.o
 	@echo "================ compile end  ================"
 
 
 clean:
 	@echo "=============== clean start ================="
-	@rm -rf spi.o spi
+	@rm -rf myself-spi.o spi
 	@echo "=============== clean end ================="
 
