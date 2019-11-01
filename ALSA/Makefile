@@ -7,7 +7,7 @@ main: clean alsa
 .PHONY: clean alsa
 # $@ 符号是Makefile中内置变量，代表目标文件
 # $^ 符号是Makefile中内置变量，代表依赖文件，即源文件
-alsa: alsa-myself-rw-wav-file-paly-music.o
+alsa: alsa-myself-rw-wav-file-paly-music.c
 	@echo "=== compile start! ==="
 	$(GCC) $^ -o $@ -lasound
 	@echo "=== compile edn! ==="

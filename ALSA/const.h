@@ -41,7 +41,21 @@ snd_pcm_format_t pcm_format;
 
 // 缓存大小
 #define BUF_LEN 1024
-char buf[BUF_LEN];
+//char buf[BUF_LEN];
+unsigned char *buff;
+unsigned char *buff1;
+
+
+// 周期数
+int periods = 2;
+// 一个周期数的大小其实是以帧为单位的 16384为字节，所以在用的时候要换算成帧数大小才可以
+snd_pcm_uframes_t period_size = 16384;
+snd_pcm_uframes_t frames;
+snd_pcm_uframes_t buffer_size;
+
+
+
+
 
 // 初始化采样率
 unsigned int rate;
