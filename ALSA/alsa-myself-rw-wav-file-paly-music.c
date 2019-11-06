@@ -41,40 +41,89 @@ int main(int argc, char *argv [])
 		flag = false;
 		switch(ret){
 			case 'm':
-				printf("open music file \n");
+				printf("打开文件 \n");
 				open_music_file(optarg);
 				break;
 			case 'f':
+				
 				format_arg = atoi(optarg);
-				printf("format_arg value is :%d \n", format_arg);
-				if(format_arg == 16){
-					//period_size = 8192 * 2;
-					pcm_format = SND_PCM_FORMAT_S16_LE;
-				}else if(format_arg == 32){
-					//period_size = 8192 * 4;
-					pcm_format = SND_PCM_FORMAT_S32_LE;
-				}else if(format_arg == 24){
-					pcm_format = SND_PCM_FORMAT_S24_LE;
-				}else{
-					pcm_format = SND_PCM_FORMAT_S8;
+				
+				// 判断是哪种采样位
+				switch(format_arg){
+					case 161:
+						printf("format_arg value is : S16LE \n");
+						pcm_format = SND_PCM_FORMAT_S16_LE;
+						break;
+					
+					case 162:
+						printf("format_arg value is : S16BE \n");
+						pcm_format = SND_PCM_FORMAT_S16_BE;
+						break;
+					
+					case 201:
+						printf("format_arg value is : S20LE \n");
+						pcm_format = SND_PCM_FORMAT_S20_LE;
+						break;
+					
+					case 202:
+						printf("format_arg value is : S20BE \n");
+						pcm_format = SND_PCM_FORMAT_S20_BE;
+						break;
+
+					case 241:
+						printf("format_arg value is : S24LE \n");
+						pcm_format = SND_PCM_FORMAT_S24_LE;
+						break;
+
+					case 242:
+						printf("format_arg value is : S24BE \n");
+						pcm_format = SND_PCM_FORMAT_S24_BE;
+						break;
+
+					case 2431:
+						printf("format_arg value is : S243LE \n");
+						pcm_format = SND_PCM_FORMAT_S24_3LE;
+						break;
+					
+					case 2432:
+						printf("format_arg value is : S243BE \n");
+						pcm_format = SND_PCM_FORMAT_S24_3BE;
+						break;
+
+					case 321:
+						printf("format_arg value is : S32LE \n");
+						pcm_format = SND_PCM_FORMAT_S32_LE;
+						break;
+
+					case 322:
+						printf("format_arg value is : S32BE \n");
+						pcm_format = SND_PCM_FORMAT_S32_BE;
+						break;
+						
+
 				}
 				break;
+				
 			case 'r':
+				
 				rate_arg = atoi(optarg);
-				printf("rate_arg value is :%d \n", rate_arg);
+				
 				if(rate_arg == 44){
+					
+					printf("rate_arg value is : 44.1HZ \n");
 					rate = 44100;
+				
 				}else if(rate_arg == 88){
+					
+					printf("rate_arg value is : 88.2HZ \n");
 					rate = 88200;
+					
 				}else{
-					rate = rate_arg;
+					
+					printf("rate_arg value is : 8HZ \n");
+					rate = 8000;
+					
 				}
-				break;
-			default:
-				printf("use default value! \n");
-				open_music_file(optarg);
-				pcm_format = SND_PCM_FORMAT_S16_LE;
-				rate = 44100;
 				break;
 		}
 	}
@@ -83,10 +132,20 @@ int main(int argc, char *argv [])
 		printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		printf("Either 1'st, 2'nd, 3'th or all parameters were missing \n");
 		printf("\n");
-		printf("1'st parameter can be one of these: -m(music_filename) \n");
-		printf("2'nd parameter can be one of these: -f(format,8bit or 16bit or 32bit) \n");
-		printf("3'th parameter can be one of these: -r(rate,44 or 88) \n");
-		printf("For example: alsa -m 1.wav -f 16 -r 44 \n");
+		printf("1'st : -m [music_filename] \n");
+		printf("		music_filename.wav \n");
+		printf("\n");
+		printf("2'nd : -f [format 241bit or 16bit or 32bit] \n");
+		printf("		161 for S16_LE, 162 for S16_BE \n");
+		printf("		241 for S24_LE, 242 for S24_BE \n");
+		printf("		2431 for S24_3LE, 2432 for S24_3BE \n");
+		printf("		321 for S32_LE, 322 for S32_BE \n");
+		printf("\n");
+		printf("3'th : -r [rate,44 or 88] \n");
+		printf("		44 for 44100hz \n");
+		printf("		82 for 88200hz \n");
+		printf("\n");
+		printf("For example: alsa -m 1.wav -f 161 -r 44 \n");
 		printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		exit(1);
 	}
@@ -132,6 +191,11 @@ int main(int argc, char *argv [])
 		pcm_format = SND_PCM_FORMAT_S16_LE;
 	}
 
+	
+	S是有符号	U是无符号
+	BE是大端（低地址存高位）
+	LE是小端（低地址存低位）
+
 #endif
 	debug_msg(snd_pcm_hw_params_set_format(pcm_handle, hw_params, pcm_format), "设置样本长度(位数)");
 
@@ -155,29 +219,49 @@ int main(int argc, char *argv [])
 	// 设置periods: 一个缓冲区所包含的周期数.
 	debug_msg(snd_pcm_hw_params_set_periods(pcm_handle, hw_params, periods, 0), "设置周期数");
 
-	
 
-
-	// 设置缓冲区 buffer_size = period_size * periods
+	// 设置缓冲区 buffer_size = period_size * periods 一个缓冲区的大小可以这么算，我上面设定了周期为2，
+	// 周期大小我们预先自己设定，那么要设置的缓存大小就是 周期大小 * 周期数 就是缓冲区大小了。
 	buffer_size = period_size * periods;
-	if(format_arg == 16){
-		/*
-			snd_pcm_hw_params_set_buffer_size() 最后一个参数是要设置的缓冲区有多大，单位是帧(frames_size),
-			一个缓冲区的大小可以这么算，我上面设定了周期为2，周期大小我们预先自己设定，那么要设置的缓存大小就是 周期大小 * 周期数 就是缓冲区大小了。
-			
-			那么为什么要再除以4呢，因为参数需要传进的是以帧为单位,所以要先把字节大小先转换为帧
-			
-			一个帧的大小 = 采样位数（长度） * 通道数，例如：我上面的采样位数位16bit，通道数为2，那么一个帧的大小就是32bit/8=4个字节
-			所以除以4以后就算出来缓冲区的大小了,其实缓冲区的大小还是 period_size * periods 个字节，只不过把这些数据变成了另一种单位传进去而已
-		*/
-		debug_msg(snd_pcm_hw_params_set_buffer_size(pcm_handle, hw_params, buffer_size>>2), "设置缓冲区");
-	}else if(format_arg == 32){
-		/*
-			如果按照上面的理解的话，那么当位数为32时，就需要除以8了
-		*/
-		debug_msg(snd_pcm_hw_params_set_buffer_size(pcm_handle, hw_params, buffer_size>>3), "设置缓冲区");
-	}
 	
+	// 为buff分配buffer_size大小的内存空间
+	buff = (unsigned char *)malloc(buffer_size);
+	
+	if(format_arg == 161 || format_arg == 162){
+
+		/**
+			snd_pcm_hw_params_set_buffer_size() 最后一个参数是要设置的缓冲区有多大，单位是帧(frames_size),
+			因为snd_pcm_hw_params_set_buffer_size第三个参数需要传进的是以帧为单位,所以要先把字节大小先转换为帧
+
+			一个帧的大小 = 采样位数（长度） * 通道数，例如：我上面的采样位数位16bit，通道数为2，那么一个帧的大小就是16bit * 2 / 8 = 4个字节
+			所以要除以4以后就算出来缓冲区的大小了,其实缓冲区的大小还是 period_size * periods 个字节，只不过把这些数据变成了另一种单位传进去而已
+
+			就好像 1美元 = 7人民币，虽然钱的数量变少了，但是价值和购买力没变，只是换成了另一种
+		**/
+		frames = buffer_size >> 2;
+	
+		debug_msg(snd_pcm_hw_params_set_buffer_size(pcm_handle, hw_params, frames), "设置S16_LE OR S16_BE缓冲区");
+		
+	}else if(format_arg == 2431 || format_arg == 2432){
+
+		frames = buffer_size / 6;
+		
+		/*
+			那么当位数为24时，就需要除以6了，因为是24bit * 2 / 8 = 6
+		*/
+		debug_msg(snd_pcm_hw_params_set_buffer_size(pcm_handle, hw_params, frames), "设置S24_3LE OR S24_3BE的缓冲区");
+		
+	}else if(format_arg == 321 || format_arg == 322 || format_arg == 241 || format_arg == 242){
+
+		frames = buffer_size >> 3;
+		/*
+			那么当位数为32时，就需要除以8了，因为是32bit * 2 / 8 = 8
+		*/
+		debug_msg(snd_pcm_hw_params_set_buffer_size(pcm_handle, hw_params, frames), "设置S32_LE OR S32_BE OR S24_LE OR S24_BE缓冲区");
+
+		
+		
+	}
 
 
 	// 设置的硬件配置参数，加载，并且会自动调用snd_pcm_prepare()将stream状态置为SND_PCM_STATE_PREPARED
@@ -201,52 +285,34 @@ int main(int argc, char *argv [])
 	exit(1);
 #endif
 
-	/*
-		这里为buffer_size分配的空间为一个周期的大小，这里的单位就变成了字节，分配的是内存空间，所以就是原本的字节大小
-		ALSA中的字节与帧的概念一定要搞清楚，不能混淆，要不太麻烦了，也不知道我这样理解是不是对的
-		缓存大小这还需要再理解理解，现在还是懵，反正这个数值设下去，在虚拟机中的linux能播放音乐，但是在另一个平台播放音乐就断断续续的
-		所以还要再研究研究。
-	*/
-	buff = (unsigned char *)malloc(period_size);
 
-#if 0
-	buff1 = (unsigned char *)malloc(period_size * 2);
-	memset(buff1, 0x00, period_size * 2);
-#endif
-
-	// snd_pcm_writei()函数第三个是帧单位，所以frames要通过除以4变成帧单位,除以4是以采样长度16bit来进行除的
-	// 意思是 这些个（period_size）大小缓存中有多少个frames（左右声道 * 一个采样位数）
-	frames = period_size >> 2;
-
-	
 	// feof函数检测文件结束符，结束：非0, 没结束：0 !feof(fp)
 	while(1){
 		// 读取文件数据放到缓存中
 		ret = fread(buff, 1, period_size, fp);
 		
 		if(ret == 0){
+			
 			printf("end of music file input! \n");
 			exit(1);
 		}
 		
 		if(ret < 0){
-			debug_msg(-1, "read pcm from file \n");
+			
+			printf("read pcm from file! \n");
+			exit(1);
 		}
 
-#if 0
-		for(int i =0; i < frames; i++){
-			buff1[i*4] = buff[i*2];
-			buff1[i*4+1] = buff[i*2+1];
-		}
-#endif
-		// 向PCM设备写入数据
+		// 向PCM设备写入数据 snd_pcm_writei()函数第三个是帧单位，意思是这些个（buffer_size）大小缓存中有多少个frames（左右声道 * 一个采样位数）
 		while((ret = snd_pcm_writei(pcm_handle, buff, frames)) < 0){
 			if (ret == -EPIPE){
-                  /* EPIPE means underrun */
-                  printf("underrun occurred -32 \n");
+				
+                  /* EPIPE means underrun 基本上-32  的错误就是缓存中的数据不够 */
+                  printf("underrun occurred -32, err_info = %s \n", snd_strerror(ret));
 				  //完成硬件参数设置，使设备准备好
                   snd_pcm_prepare(pcm_handle);
-            }else if(ret < 0){
+			
+            } else if(ret < 0){
 				printf("ret value is : %d \n", ret);
 				debug_msg(-1, "write to audio interface failed");
 			}
@@ -298,7 +364,7 @@ void open_music_file(const char *path_name){
 bool debug_msg(int result, const char *str)
 {
 	if(result < 0){
-		printf("err: %s 失败! \n", str);
+		printf("err: %s 失败!, result = %d, err_info = %s \n", str, result, snd_strerror(result));
 		exit(1);
 	}
 	return true;

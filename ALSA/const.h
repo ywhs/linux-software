@@ -48,8 +48,8 @@ unsigned char *buff1;
 
 // 周期数
 int periods = 2;
-// 一个周期数的大小其实是以帧为单位的 16384为字节，所以在用的时候要换算成帧数大小才可以
-snd_pcm_uframes_t period_size = 16384;
+// 一个周期的大小，这里虽然是设置的字节大小，但是在有时候需要将此大小转换为帧，所以在用的时候要换算成帧数大小才可以
+snd_pcm_uframes_t period_size = 10 * 1024;
 snd_pcm_uframes_t frames;
 snd_pcm_uframes_t buffer_size;
 
