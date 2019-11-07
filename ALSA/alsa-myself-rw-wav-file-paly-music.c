@@ -145,7 +145,7 @@ int main(int argc, char *argv [])
 		printf("		44 for 44100hz \n");
 		printf("		82 for 88200hz \n");
 		printf("\n");
-		printf("For example: alsa -m 1.wav -f 161 -r 44 \n");
+		printf("For example: ./alsa -m 1.wav -f 161 -r 44 \n");
 		printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		exit(1);
 	}
@@ -195,6 +195,8 @@ int main(int argc, char *argv [])
 	S是有符号	U是无符号
 	BE是大端（低地址存高位）
 	LE是小端（低地址存低位）
+
+	BE 还是 LE 都是相对于软件层面来说的
 
 #endif
 	debug_msg(snd_pcm_hw_params_set_format(pcm_handle, hw_params, pcm_format), "设置样本长度(位数)");
@@ -289,7 +291,7 @@ int main(int argc, char *argv [])
 	// feof函数检测文件结束符，结束：非0, 没结束：0 !feof(fp)
 	while(1){
 		// 读取文件数据放到缓存中
-		ret = fread(buff, 1, period_size, fp);
+		ret = fread(buff, 1, buffer_size, fp);
 		
 		if(ret == 0){
 			
