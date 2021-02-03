@@ -1,2 +1,2 @@
-# rpi-arm64
-build script file  of  rpi-arm64
+# python
+学习python后的笔记
